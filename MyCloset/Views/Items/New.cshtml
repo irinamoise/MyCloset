@@ -1,0 +1,48 @@
+﻿@model MyCloset.Models.Item
+
+
+<h2 class="text-center mt-5">Adaugare item</h2>
+
+<br />
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-6 offset-3">
+
+            <form method="post" enctype="multipart/form-data" asp-controller="Items" asp-action="New">
+
+                <div class="form-group">
+                    <label asp-for="Name" class="form-label">Nume Item</label>
+                    <br />
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                    <br /><br />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Caption" class="form-label">Descriere Item</label>
+                    <br />
+                    <textarea asp-for="Caption" class="form-control"></textarea>
+                    <span asp-validation-for="Caption" class="text-danger"></span>
+                    <br /><br />
+                </div>
+                <div class="form-group">
+                    <label for="CategoryId">Selectati categoria</label>
+                    <br />
+
+                    <select asp-for="CategoryId" asp-items="Model.Categ" class="form-control">
+
+                        <option value="">Selectati categoria</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="text-danger"></span>
+                    <br /><br />
+                </div>
+                <div class="form-group">
+                    <label asp-for="Image">Incarca Imaginea</label>
+                    <input asp-for="Image" class="form-control" type="file" />
+                    <span asp-validation-for="Image" class="text-danger"></span>
+                </div>
+                <button class="btn btn-success" type="submit">Adauga articol</button>
+            </form>
+        </div>
+    </div>
+</div>

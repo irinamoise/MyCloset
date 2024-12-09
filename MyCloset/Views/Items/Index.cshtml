@@ -1,0 +1,30 @@
+﻿@model MyCloset.Models.Item
+
+<br />
+<h2 class="text-center">Afisare items</h2>
+
+<br />
+
+@if (ViewBag.Message != null)
+{
+
+    <h2 class="alert-success p-3 rounded-3 text-center mb-5">@ViewBag.Message</h2>
+}
+
+<br />
+
+
+@foreach (var item in ViewBag.Items)
+{
+    <div class="card">
+
+        <partial name="ItemInfo" model="item"></partial>
+
+        <a class="btn btn-success" asp-controller="Items" asp-action="Show" asp-route-id="@item.Id">Afisare item</a>
+
+    </div>
+
+    <br />
+    <br />
+}
+
