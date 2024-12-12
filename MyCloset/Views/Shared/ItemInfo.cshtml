@@ -1,18 +1,20 @@
-﻿@model MyCloset.Models.Item
+﻿
+
+@model MyCloset.Models.Item
 
 <div class="card-body">
 
     <h3 class="card-title alert-success py-3 px-3 rounded-2">@Model.Name</h3>
 
-    @if(@Model.Image.Contains(".mp4") || @Model.Image.Contains(".mov"))
+    @if (@Model.Image.Contains(".mp4") || @Model.Image.Contains(".mov"))
     {
         <video width="550" height="300" controls>
-        <source src="@Model.Image" type="video/mp4">
-        Your browser does not support the video tag.
+            <source src="@Model.Image" type="video/mp4">
+            Your browser does not support the video tag.
         </video>
-        }
-        else
-        {
+    }
+    else
+    {
         <img src="@Model.Image" alt="Article Image" style="width:
         100%; height: 450px; object-fit: cover" />
     }
@@ -28,5 +30,4 @@
     </div>
 
 </div>
-
 
