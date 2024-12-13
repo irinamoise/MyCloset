@@ -1,4 +1,5 @@
 ﻿using System.Net.NetworkInformation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -100,10 +101,13 @@ namespace MyCloset.Controllers
 
         // Se adauga articolul in baza de date
         [HttpPost]
+        [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> New(Item item, IFormFile Image)
         {
             item.Date = DateTime.Now;
             item.Categ = GetAllCategories();
+
+            item.UserId = _userManager.GetUserId(User);
 
             if (Image != null && Image.Length > 0)
             {
@@ -146,6 +150,8 @@ namespace MyCloset.Controllers
         // Categoria se selecteaza dintr-un dropdown
         // HttpGet implicit
         // Se afiseaza formularul impreuna cu datele aferente articolului din baza de date
+
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Edit(int id)
         {
 
@@ -155,31 +161,52 @@ namespace MyCloset.Controllers
 
             item.Categ = GetAllCategories();
 
-            return View(item);
+
+            if (item.UserId == _userManager.GetUserId(User) ||User.IsInRole("Admin"))
+            {
+                return View(item);
+            }
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul sa faceti modificari asupra unui item care nu va apartine";
+            return RedirectToAction("Index");
+            }
 
         }
 
         // Se adauga articolul modificat in baza de date
         [HttpPost]
+
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Edit(int id, Item requestItem)
         {
             Item item = db.Items.Find(id);
 
-            if (ModelState.IsValid)
-            {
-                item.Name = requestItem.Name;
-                item.Caption = requestItem.Caption;
-                item.Date = DateTime.Now;
-                item.CategoryId = requestItem.CategoryId;
-                TempData["message"] = "Itemul a fost modificat";
-                db.SaveChanges();
-                return RedirectToAction("Index");
+           
 
+            if (item.UserId == _userManager.GetUserId(User) ||User.IsInRole("Admin"))
+            {
+                if (ModelState.IsValid)
+                {
+                    item.Name = requestItem.Name;
+                    item.Caption = requestItem.Caption;
+                    item.Date = DateTime.Now;
+                    item.CategoryId = requestItem.CategoryId;
+                    TempData["message"] = "Itemul a fost modificat";
+                    db.SaveChanges();
+                    return RedirectToAction("Index");
+
+                }
+                else
+                {
+                    requestItem.Categ = GetAllCategories();
+                    return View(requestItem);
+                }
             }
             else
             {
-                requestItem.Categ = GetAllCategories();
-                return View(requestItem);
+                TempData["message"] = "Nu aveti dreptul sa faceti modificari asupra unui item care nu va apartine";
+            return RedirectToAction("Index");
             }
         }
 
@@ -189,10 +216,22 @@ namespace MyCloset.Controllers
         public ActionResult Delete(int id)
         {
             Item item = db.Items.Find(id);
-            db.Items.Remove(item);
-            db.SaveChanges();
-            TempData["message"] = "Itemul a fost sters";
+
+            if (item.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin"))
+            {
+                db.Items.Remove(item);
+                db.SaveChanges();
+                TempData["message"] = "Itemul a fost sters";
+                return RedirectToAction("Index");
+            }
+            else
+            {
+                TempData["message"] = "Nu aveti dreptul sa faceti modificari asupra unui item care nu va apartine";
             return RedirectToAction("Index");
+            }
+
+            
+            
         }
 
         [NonAction]

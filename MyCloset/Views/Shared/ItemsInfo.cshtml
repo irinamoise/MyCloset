@@ -1,0 +1,30 @@
+﻿@model MyCloset.Models.Item
+
+<div class="card-body">
+
+    <h3 class="card-title alert-success py-3 px-3 rounded-2">@Model.Name</h3>
+
+    @if (@Model.Image.Contains(".mp4") || @Model.Image.Contains(".mov"))
+    {
+        <video width="550" height="300" controls>
+            <source src="@Model.Image" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    }
+    else
+    {
+        <img src="@Model.Image" alt="Article Image" style="width:
+        100%; height: 450px; object-fit: cover" />
+    }
+
+    <div class="card-text">@Model.Caption</div>
+
+    <div class="d-flex justify-content-between flex-row mt-5">
+
+        <div><i class="bi bi-globe"></i> @Model.Category.CategoryName</div>
+
+        <span class="alert-success">@Model.Date</span>
+
+    </div>
+
+</div>
