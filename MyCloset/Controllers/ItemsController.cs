@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MyCloset.Data;
 using MyCloset.Models;
+using static MyCloset.Models.ItemBookmark;
 
 namespace MyCloset.Controllers
 {
@@ -51,12 +52,30 @@ namespace MyCloset.Controllers
         // Se afiseaza un singur articol in functie de id-ul sau 
         // impreuna cu categoria din care face parte
         // In plus sunt preluate si toate comentariile asociate unui articol
-        // HttpGet implicit
+        // Se afiseaza si userul care a postat articolul respectiv
+        // [HttpGet] se executa implicit implicit
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Show(int id)
         {
-            Item item = db.Items.Include("Category").Include("Comments")
-                              .Where(art => art.Id == id)
-                              .First();
+            Item item = db.Items.Include("Category")
+                                    .Include("Comments")
+                                    .Include("User")
+                                    .Include("Comments.User")
+                                    .Where(it => it.Id == id)
+                                    .First();
+
+            // Adaugam bookmark-urile utilizatorului pentru dropdown
+            ViewBag.UserBookmarks = db.Bookmarks
+                                      .Where(b => b.UserId == _userManager.GetUserId(User))
+                                      .ToList();
+
+            SetAccessRights();
+
+            if (TempData.ContainsKey("message"))
+            {
+                ViewBag.Message = TempData["message"];
+                ViewBag.Alert = TempData["messageType"];
+            }
 
             return View(item);
         }
@@ -67,10 +86,15 @@ namespace MyCloset.Controllers
 
 
         // Adaugarea unui comentariu asociat unui articol in baza de date
+        
         [HttpPost]
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Show([FromForm] Comment comment)
         {
             comment.Date = DateTime.Now;
+
+            // preluam Id-ul utilizatorului care posteaza comentariul
+            comment.UserId = _userManager.GetUserId(User);
 
             if (ModelState.IsValid)
             {
@@ -80,16 +104,66 @@ namespace MyCloset.Controllers
             }
             else
             {
-                Item it = db.Items.Include("Category").Include("Comments")
-                               .Where(art => art.Id == comment.ItemId)
-                               .First();
+                Item it = db.Items.Include("Category")
+                                  .Include("User")
+                                  .Include("Comments")
+                                  .Include("Comments.User")
+                                  .Where(art => art.Id == comment.ItemId)
+                                  .First();
 
                 //return Redirect("/Articles/Show/" + comm.ArticleId);
+
+                // Adaugam bookmark-urile utilizatorului pentru dropdown
+                ViewBag.UserBookmarks = db.Bookmarks
+                                          .Where(b => b.UserId == _userManager.GetUserId(User))
+                                          .ToList();
+
+                SetAccessRights();
 
                 return View(it);
             }
         }
 
+        [HttpPost]
+        [Authorize(Roles = "User,Admin")]
+        public IActionResult AddBookmark([FromForm] ItemBookmark itemBookmark)
+        {
+            // Daca modelul este valid
+            if (ModelState.IsValid)
+            {
+                // Verificam daca avem deja itemul in colectie
+                if (db.ItemBookmarks
+                    .Where(ab => ab.ItemId == itemBookmark.ItemId)
+                    .Where(ab => ab.BookmarkId == itemBookmark.BookmarkId)
+                    .Count() > 0)
+                {
+                    TempData["message"] = "Acest item este deja adaugat in colectie";
+                    TempData["messageType"] = "alert-danger";
+                }
+                else
+                {
+                    // Adaugam asocierea intre articol si bookmark 
+                    db.ItemBookmarks.Add(itemBookmark);
+                    // Salvam modificarile
+                    db.SaveChanges();
+
+                    // Adaugam un mesaj de succes
+                    TempData["message"] = "Itemul a fost adaugat in colectia selectata";
+                    TempData["messageType"] = "alert-success";
+                }
+
+            }
+            else
+            {
+                TempData["message"] = "Nu s-a putut adauga itemul in colectie";
+                TempData["messageType"] = "alert-danger";
+            }
+
+            // Ne intoarcem la pagina itemului
+            return Redirect("/Items/Show/" + itemBookmark.ItemId);
+        }
+
+        [Authorize(Roles = "User,Admin")]
         public IActionResult New()
         {
             Item item= new Item();
@@ -99,11 +173,12 @@ namespace MyCloset.Controllers
             return View(item);
         }
 
-        // Se adauga articolul in baza de date
+        // Se adauga itemul in baza de date
         [HttpPost]
         [Authorize(Roles = "User,Admin")]
         public async Task<IActionResult> New(Item item, IFormFile Image)
         {
+
             item.Date = DateTime.Now;
             item.Categ = GetAllCategories();
 
@@ -139,6 +214,8 @@ namespace MyCloset.Controllers
                 // Adăugare articol
                 db.Items.Add(item);
                 await db.SaveChangesAsync();
+                TempData["message"] = "Itemul a fost adaugat";
+                TempData["messageType"] = "alert-success";
                 // Redirecționare după succes
                 return RedirectToAction("Index", "Items");
             }
@@ -182,57 +259,75 @@ namespace MyCloset.Controllers
         {
             Item item = db.Items.Find(id);
 
-           
-
-            if (item.UserId == _userManager.GetUserId(User) ||User.IsInRole("Admin"))
+            if (ModelState.IsValid)
             {
-                if (ModelState.IsValid)
+                if (item.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin"))
                 {
                     item.Name = requestItem.Name;
                     item.Caption = requestItem.Caption;
                     item.Date = DateTime.Now;
                     item.CategoryId = requestItem.CategoryId;
                     TempData["message"] = "Itemul a fost modificat";
+                    TempData["messageType"] = "alert-success";
                     db.SaveChanges();
                     return RedirectToAction("Index");
 
                 }
                 else
                 {
-                    requestItem.Categ = GetAllCategories();
-                    return View(requestItem);
+                    TempData["message"] = "Nu aveti dreptul sa faceti modificari asupra unui item care nu va apartine";
+                    TempData["messageType"] = "alert-danger";
+                    return RedirectToAction("Index");
                 }
             }
             else
             {
-                TempData["message"] = "Nu aveti dreptul sa faceti modificari asupra unui item care nu va apartine";
-            return RedirectToAction("Index");
+                requestItem.Categ = GetAllCategories();
+                return View(requestItem);
             }
+
         }
 
 
         // Se sterge un item din baza de date 
         [HttpPost]
+        [Authorize(Roles = "User,Admin")]
         public ActionResult Delete(int id)
         {
-            Item item = db.Items.Find(id);
+            Item item = db.Items.Include("Comments")
+                                         .Where(art => art.Id == id)
+                                         .First();
 
             if (item.UserId == _userManager.GetUserId(User) || User.IsInRole("Admin"))
             {
                 db.Items.Remove(item);
                 db.SaveChanges();
                 TempData["message"] = "Itemul a fost sters";
+                TempData["messageType"] = "alert-success";
                 return RedirectToAction("Index");
             }
             else
             {
                 TempData["message"] = "Nu aveti dreptul sa faceti modificari asupra unui item care nu va apartine";
-            return RedirectToAction("Index");
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
             }
 
             
             
         }
+
+        // Conditiile de afisare pentru butoanele de editare si stergere
+        // butoanele aflate in view-uri
+        private void SetAccessRights()
+        {
+            ViewBag.AfisareButoane = false;
+
+            ViewBag.UserCurent = _userManager.GetUserId(User);
+
+            ViewBag.EsteAdmin = User.IsInRole("Admin");
+        }
+
 
         [NonAction]
         public IEnumerable<SelectListItem> GetAllCategories()
@@ -262,14 +357,7 @@ namespace MyCloset.Controllers
             return selectList;
         }
 
-        // Metoda utilizata pentru exemplificarea Layout-ului
-        // Am adaugat un nou Layout in Views -> Shared -> numit _LayoutNou.cshtml
-        // Aceasta metoda are un View asociat care utilizeaza noul layout creat
-        // in locul celui default generat de framework numit _Layout.cshtml
-       // public IActionResult IndexNou()
-        //{
-            //return View();
-        //}
+        
     }
 
     
