@@ -318,6 +318,7 @@ namespace MyCloset.Controllers
         }
 
         // Se adauga articolul modificat in baza de date
+       
         [HttpPost]
 
         [Authorize(Roles = "User,Admin")]
@@ -333,6 +334,13 @@ namespace MyCloset.Controllers
                     item.Caption = requestItem.Caption;
                     item.Date = DateTime.Now;
                     item.CategoryId = requestItem.CategoryId;
+
+                    // Imaginea nu este modificată dacă nu este furnizată o nouă imagine
+                    if (!string.IsNullOrEmpty(requestItem.Image))
+                    {
+                        item.Image = requestItem.Image;
+                    }
+
                     TempData["message"] = "Itemul a fost modificat";
                     TempData["messageType"] = "alert-success";
                     db.SaveChanges();
