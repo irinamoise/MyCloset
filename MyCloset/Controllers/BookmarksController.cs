@@ -46,7 +46,7 @@ namespace MyCloset.Controllers
 
             SetAccessRights();
 
-            if (User.IsInRole("User") || User.IsInRole("Editor"))
+            if (User.IsInRole("User"))
             {
                 var bookmarks = from bookmark in db.Bookmarks.Include("User")
                                .Where(b => b.UserId == _userManager.GetUserId(User))
@@ -83,7 +83,7 @@ namespace MyCloset.Controllers
         {
             SetAccessRights();
 
-            if (User.IsInRole("User") || User.IsInRole("Editor"))
+            if (User.IsInRole("User"))
             {
                 var bookmarks = db.Bookmarks
                                   .Include("ItemBookmarks.Item.Category")
