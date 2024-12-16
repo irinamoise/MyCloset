@@ -7,13 +7,16 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using MyCloset.Data;
 using MyCloset.Models;
+using System.Linq;
 
-namespace ArticlesApp.Controllers
+namespace MyCloset.Controllers
 {
     [Authorize(Roles = "Admin")]
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext db;
+
+        private readonly IWebHostEnvironment _env;
 
         private readonly UserManager<ApplicationUser> _userManager;
 
@@ -22,11 +25,12 @@ namespace ArticlesApp.Controllers
         public UsersController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager
+            RoleManager<IdentityRole> roleManager,
+            IWebHostEnvironment env
             )
         {
             db = context;
-
+            _env = env;
             _userManager = userManager;
 
             _roleManager = roleManager;
@@ -51,6 +55,8 @@ namespace ArticlesApp.Controllers
 
             ViewBag.UserCurent = await _userManager.GetUserAsync(User);
 
+            ViewBag.Items = db.Items.Where(item => item.UserId == id).ToList();
+
             return View(user);
         }
 
@@ -71,13 +77,48 @@ namespace ArticlesApp.Controllers
             return View(user);
         }
 
+        //[HttpPost]
+        //public async Task<ActionResult> Edit(string id, ApplicationUser newData, [FromForm] string newRole)
+        //{
+        //    ApplicationUser user = db.Users.Find(id);
+
+        //    user.AllRoles = GetAllRoles();
+
+
+        //    if (ModelState.IsValid)
+        //    {
+        //        user.UserName = newData.UserName;
+        //        user.Email = newData.Email;
+        //        user.FirstName = newData.FirstName;
+        //        user.LastName = newData.LastName;
+        //        user.PhoneNumber = newData.PhoneNumber;
+        //        user.Bio = newData.Bio;
+
+        //        // Cautam toate rolurile din baza de date
+        //        var roles = db.Roles.ToList();
+
+        //        foreach (var role in roles)
+        //        {
+        //            // Scoatem userul din rolurile anterioare
+        //            await _userManager.RemoveFromRoleAsync(user, role.Name);
+        //        }
+        //        // Adaugam noul rol selectat
+        //        var roleName = await _roleManager.FindByIdAsync(newRole);
+        //        await _userManager.AddToRoleAsync(user, roleName.ToString());
+
+        //        db.SaveChanges();
+
+        //    }
+        //    return RedirectToAction("Index");
+        //}
+
+
         [HttpPost]
-        public async Task<ActionResult> Edit(string id, ApplicationUser newData, [FromForm] string newRole)
+        public async Task<ActionResult> Edit(string id, ApplicationUser newData, [FromForm] string newRole, [FromForm] IFormFile ProfilePicture)
         {
             ApplicationUser user = db.Users.Find(id);
 
             user.AllRoles = GetAllRoles();
-
 
             if (ModelState.IsValid)
             {
@@ -86,7 +127,38 @@ namespace ArticlesApp.Controllers
                 user.FirstName = newData.FirstName;
                 user.LastName = newData.LastName;
                 user.PhoneNumber = newData.PhoneNumber;
+                user.Bio = newData.Bio;
 
+                if (ProfilePicture != null && ProfilePicture.Length > 0)
+                {
+                    var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".mp4", ".mov" };
+                    var fileExtension = Path.GetExtension(ProfilePicture.FileName).ToLower();
+                    if (!allowedExtensions.Contains(fileExtension))
+                    {
+                        ModelState.AddModelError("ArticleImage", "Fișierul trebuie să fie o imagine(jpg, jpeg, png, gif) sau un video(mp4, mov).");
+                        return View(user);
+                    }
+
+                    // Cale stocare
+                    var storagePath = Path.Combine(_env.WebRootPath, "images", ProfilePicture.FileName);
+
+                    var databaseFileName = "/images/" + ProfilePicture.FileName;
+                    // Salvare fișier
+                    using (var fileStream = new FileStream(storagePath, FileMode.Create))
+                    {
+                        await ProfilePicture.CopyToAsync(fileStream);
+                    }
+
+                    ModelState.Remove(nameof(user.ProfilePicture));
+                    user.ProfilePicture = databaseFileName;
+
+                }
+
+                //modificare poza de profil in baza de date
+                if(TryValidateModel(user))
+                {
+                    db.Entry(user).State = EntityState.Modified;
+                }
 
                 // Cautam toate rolurile din baza de date
                 var roles = db.Roles.ToList();
@@ -101,17 +173,15 @@ namespace ArticlesApp.Controllers
                 await _userManager.AddToRoleAsync(user, roleName.ToString());
 
                 db.SaveChanges();
-
             }
             return RedirectToAction("Index");
         }
-
 
         [HttpPost]
         public IActionResult Delete(string id)
         {
             var user = db.Users
-                         .Include("Articles")
+                         .Include("Items")
                          .Include("Comments")
                          .Include("Bookmarks")
                          .Where(u => u.Id == id)

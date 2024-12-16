@@ -1,0 +1,75 @@
+﻿@model MyCloset.Models.ApplicationUser
+
+
+<form enctype="multipart/form-data" asp-controller="Users" asp-action="Edit" method="post" asp-route-id="@Model.Id">
+
+    <i class="bi bi-person"></i>
+    <label asp-for="UserName">Nume utilizator</label>
+    <br />
+    <input asp-for="UserName" class="form-control" />
+    <br />
+
+    <i class="bi bi-envelope"></i>
+    <label asp-for="Email">Email utilizator</label>
+    <br />
+    <input asp-for="Email" class="form-control" />
+    <br />
+
+    <i class="bi bi-phone"></i>
+    <label asp-for="PhoneNumber">Numar telefon</label>
+    <br />
+    <input asp-for="PhoneNumber" class="form-control" />
+    <br />
+
+    <i class="bi bi-person"></i>
+    <label asp-for="FirstName">Prenume utilizator</label>
+    <br />
+    <input asp-for="FirstName" class="form-control" />
+    <br />
+
+    <i class="bi bi-person"></i>
+    <label asp-for="LastName">Nume utilizator</label>
+    <br />
+    <input asp-for="LastName" class="form-control" />
+    <br />
+
+    <i class="bi bi-person"></i>
+    <label asp-for="Bio">Descriere</label>
+    <br />
+    <input asp-for="Bio" class="form-control" />
+    <br />
+
+    <div class="form-group">
+        <label asp-for="ProfilePicture">Incarca poza de profil</label>
+        <input asp-for="ProfilePicture" class="form-control" type="file" />
+        <span asp-validation-for="ProfilePicture" class="text-danger"></span>
+    </div>
+
+    <i class="bi bi-card-list"></i>
+    <label>Selectati rolul</label>
+    <br />
+
+
+    <select name="newRole" class="form-control">
+        <option selected>Selectati rolul</option>
+
+        @foreach (var role in ViewBag.AllRoles)
+        {
+            @if (ViewBag.UserRole == role.Value)
+            {
+                <option selected="selected" value="@role.Value">@role.Text</option>
+            }
+            else
+            {
+                <option value="@role.Value">@role.Text</option>
+            }
+        }
+    </select>
+
+    <button type="submit" class="btn btn-sm btn-success">Editare user</button>
+
+</form>
+
+
+
+

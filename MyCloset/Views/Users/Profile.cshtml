@@ -1,0 +1,45 @@
+﻿@model MyCloset.Models.ApplicationUser
+
+<div class="card mt-3" style="height:100%; width: 100%;">
+
+    <div class="card-body d-flex justify-content-between flex-column">
+        <div>
+            <p><i class="bi bi-person"> </i> Username: @Model.UserName</p>
+
+            @if (@Model.FirstName != null)
+            {
+                <p><i class="bi bi-envelope"></i> Prenume: @Model.FirstName</p>
+            }
+
+            @if (@Model.LastName != null)
+            {
+                <p><i class="bi bi-envelope"></i> Nume: @Model.LastName</p>
+            }
+
+            @if (@Model.Bio != null)
+            {
+                <p><i class="bi bi-phone"></i> Descriere: @Model.Bio</p>
+            }
+
+            @if (ViewBag.Items.Count > 0)
+            {
+                <p><i class="bi bi-person"> </i> Item-uri:</p>
+                @foreach (var item in ViewBag.Items)
+                {
+                    if (item.UserId == Model.Id)
+                    {
+                        <div class="card">
+                            <partial name="ItemsInfo" model="item"></partial>
+                            <a class="btn btn-success" asp-controller="Items" asp-action="Show" asp-route-id="@item.Id">Afisare item</a>
+                        </div>
+                        <br />
+                        <br />
+                    }
+                }
+
+            }
+        </div>
+
+           
+    </div>
+</div>

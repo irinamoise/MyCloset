@@ -41,6 +41,9 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Bookmarks" asp-action="Index">Colectii</a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Profile">Vizualizare profil</a>
+                            </li>
                         }
 
                         @if (User.IsInRole("User"))
@@ -50,6 +53,9 @@
                             </li>                     
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Bookmarks" asp-action="Index">Colectii</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Profile">Vizualizare profil</a>
                             </li>
                         }
 

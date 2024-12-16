@@ -21,6 +21,9 @@ namespace MyCloset.Models
 
         public string? LastName { get; set; }
 
+        public string? Bio { get; set; }
+
+        public string? ProfilePicture { get; set; }
         // variabila in care vom retine rolurile existente in baza de date
         // pentru popularea unui dropdown list
         [NotMapped]

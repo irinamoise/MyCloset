@@ -36,14 +36,80 @@ namespace MyCloset.Controllers
         // HttpGet implicit
         public IActionResult Index()
         {
-            var items = db.Items.Include("Category");
+            var items = db.Items.Include("Category").Include("User").OrderByDescending(a => a.Date);
 
-            // ViewBag.OriceDenumireSugestiva
+            var search = "";
+
+            if (Convert.ToString(HttpContext.Request.Query["search"]) != null)
+            {
+                // eliminam spatiile libere
+                search = Convert.ToString(HttpContext.Request.Query["search"]).Trim();
+                //cautare dupa nume si descriere
+                List<int> itemIds = db.Items.Where
+                    (
+                    it => it.Name.Contains(search) 
+                        || it.Caption.Contains(search)
+                    ).Select(a => a.Id).ToList();
+
+                // de adaugat cautarea dupa colectii/bookmarkuri
+
+                items = db.Items.Where(item => itemIds.Contains(item.Id)).Include("Category").Include("User").OrderByDescending(a => a.Date);
+            }
             ViewBag.Items = items;
+            ViewBag.Search = search;
 
             if (TempData.ContainsKey("message"))
             {
                 ViewBag.Message = TempData["message"];
+            }
+
+            // AFISARE PAGINATA
+
+            // Alegem sa afisam 3 articole pe pagina
+            int _perPage = 3;
+
+            // Fiind un numar variabil de articole, verificam de fiecare data utilizand 
+            // metoda Count()
+
+            int totalItems = items.Count();
+
+            // Se preia pagina curenta din View-ul asociat
+            // Numarul paginii este valoarea parametrului page din ruta
+            // /Articles/Index?page=valoare
+
+            var currentPage = Convert.ToInt32(HttpContext.Request.Query["page"]);
+
+            // Pentru prima pagina offsetul o sa fie zero
+            // Pentru pagina 2 o sa fie 3 
+            // Asadar offsetul este egal cu numarul de articole care au fost deja afisate pe paginile anterioare
+            var offset = 0;
+
+            // Se calculeaza offsetul in functie de numarul paginii la care suntem
+            if (!currentPage.Equals(0))
+            {
+                offset = (currentPage - 1) * _perPage;
+            }
+
+            // Se preiau articolele corespunzatoare pentru fiecare pagina la care ne aflam 
+            // in functie de offset
+            var paginatedItems = items.Skip(offset).Take(_perPage);
+
+
+            // Preluam numarul ultimei pagini
+            ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perPage);
+
+            // Trimitem articolele cu ajutorul unui ViewBag catre View-ul corespunzator
+            ViewBag.Items = paginatedItems;
+
+            // DACA AVEM AFISAREA PAGINATA IMPREUNA CU SEARCH
+
+            if (search != "")
+            {
+                ViewBag.PaginationBaseUrl = "/Items/Index/?search=" + search + "&page";
+            }
+            else
+            {
+                ViewBag.PaginationBaseUrl = "/Items/Index/?page";
             }
 
             return View();
