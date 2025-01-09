@@ -11,7 +11,7 @@ using System.Linq;
 
 namespace MyCloset.Controllers
 {
-    [Authorize(Roles = "Admin")]
+    
     public class UsersController : Controller
     {
         private readonly ApplicationDbContext db;
@@ -35,6 +35,8 @@ namespace MyCloset.Controllers
 
             _roleManager = roleManager;
         }
+
+        [Authorize(Roles = "Admin")]
         public IActionResult Index()
         {
             var users = from user in db.Users
@@ -46,6 +48,7 @@ namespace MyCloset.Controllers
             return View();
         }
 
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult> Show(string id)
         {
             ApplicationUser user = db.Users.Find(id);
@@ -60,6 +63,20 @@ namespace MyCloset.Controllers
             return View(user);
         }
 
+        [Authorize]
+        public async Task<IActionResult> MyProfile()
+        {
+            var user = await _userManager.GetUserAsync(User);
+            var roles = await _userManager.GetRolesAsync(user);
+
+            ViewBag.UserCurent = user;
+            ViewBag.Roles = roles;
+            ViewBag.Items = db.Items.Where(item => item.UserId == user.Id).ToList();
+
+            return View("Show", user);
+        }
+
+        [Authorize]
         public async Task<ActionResult> Edit(string id)
         {
             ApplicationUser user = db.Users.Find(id);
@@ -77,6 +94,7 @@ namespace MyCloset.Controllers
             return View(user);
         }
 
+        
         //[HttpPost]
         //public async Task<ActionResult> Edit(string id, ApplicationUser newData, [FromForm] string newRole)
         //{
@@ -112,7 +130,7 @@ namespace MyCloset.Controllers
         //    return RedirectToAction("Index");
         //}
 
-
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult> Edit(string id, ApplicationUser newData, [FromForm] string newRole, [FromForm] IFormFile ProfilePicture)
         {
@@ -174,10 +192,12 @@ namespace MyCloset.Controllers
 
                 db.SaveChanges();
             }
-            return RedirectToAction("Index");
+            db.SaveChanges();
+            return RedirectToAction("MyProfile");
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public IActionResult Delete(string id)
         {
             var user = db.Users
@@ -221,6 +241,10 @@ namespace MyCloset.Controllers
             return RedirectToAction("Index");
         }
 
+        private void SetAccessRights()
+        {
+            ViewBag.EsteAdmin = User.IsInRole("Admin");
+        }
 
         [NonAction]
         public IEnumerable<SelectListItem> GetAllRoles()

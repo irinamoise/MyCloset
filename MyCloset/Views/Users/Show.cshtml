@@ -30,7 +30,6 @@
                 <p><i class="bi bi-phone"></i> Descriere: @Model.Bio</p>
             }
 
-            
 
             @if (ViewBag.Roles.Count > 0)
             {
@@ -40,6 +39,14 @@
                     <span class="rounded-pill bg-dark mr-2 px-4 py-2 text-white">@role</span>
                 }
             }
+
+            @if ((string)Model.Id == ViewBag.UserCurent.Id)
+            {
+                <div class="d-flex flex-row justify-content-between p-3">
+                    <a class="btn btn-primary" asp-controller="Users" asp-action="Edit" asp-route-id="@Model.Id">Edit Profile</a>
+                </div>
+            }
+            
         </div>
         
         @*
