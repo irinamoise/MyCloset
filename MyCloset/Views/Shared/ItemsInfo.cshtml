@@ -19,6 +19,12 @@
 
     <div class="card-text">@Model.Caption</div>
 
+    <p>Likes: @Model.Likes</p>
+    <form asp-action="Like" asp-controller="Items" method="post">
+        <input type="hidden" name="id" value="@Model.Id" />
+        <button type="submit">Like</button>
+    </form>
+
     <div class="d-flex justify-content-between flex-row mt-5">
 
         <div><i class="bi bi-globe"></i> @Model.Category.CategoryName</div>

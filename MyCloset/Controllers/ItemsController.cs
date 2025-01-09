@@ -34,6 +34,43 @@ namespace MyCloset.Controllers
         // Se afiseaza lista tuturor articolelor impreuna cu categoria 
         // din care fac parte
         // HttpGet implicit
+
+        /// 
+        
+        [HttpPost]
+        public IActionResult Like(int id)
+        {
+            var userId = _userManager.GetUserId(User);
+            var item = db.Items.Include(i => i.ItemLikes).FirstOrDefault(i => i.Id == id);
+
+            if (item == null)
+            {
+                return NotFound();
+            }
+
+            var existingLike = item.ItemLikes.FirstOrDefault(il => il.UserId == userId);
+
+            if (existingLike == null)
+            {
+                var itemLike = new ItemLike
+                {
+                    ItemId = id,
+                    UserId = userId
+                };
+                db.ItemLikes.Add(itemLike);
+                item.Likes++;
+            }
+            else
+            {
+                db.ItemLikes.Remove(existingLike);
+                item.Likes--;
+            }
+
+            db.SaveChanges();
+
+            return RedirectToAction("Show", new { id = id });
+        }
+
         public IActionResult Index()
         {
             var items = db.Items.Include("Category").Include("User").OrderByDescending(a => a.Date);

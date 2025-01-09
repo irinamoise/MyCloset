@@ -17,7 +17,7 @@ namespace MyCloset.Data
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Bookmark> Bookmarks { get; set; }
         public DbSet<ItemBookmark> ItemBookmarks { get; set; }
-
+        public DbSet<ItemLike> ItemLikes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

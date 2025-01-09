@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MyCloset.Data;
 
@@ -11,9 +12,11 @@ using MyCloset.Data;
 namespace MyCloset.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250108221534_likes")]
+    partial class likes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -374,30 +377,6 @@ namespace MyCloset.Data.Migrations
                     b.ToTable("ItemBookmarks");
                 });
 
-            modelBuilder.Entity("MyCloset.Models.ItemLike", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ItemId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("ItemLikes");
-                });
-
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -511,25 +490,6 @@ namespace MyCloset.Data.Migrations
                     b.Navigation("Item");
                 });
 
-            modelBuilder.Entity("MyCloset.Models.ItemLike", b =>
-                {
-                    b.HasOne("MyCloset.Models.Item", "Item")
-                        .WithMany("ItemLikes")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("MyCloset.Models.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("MyCloset.Models.ApplicationUser", b =>
                 {
                     b.Navigation("Bookmarks");
@@ -554,8 +514,6 @@ namespace MyCloset.Data.Migrations
                     b.Navigation("Comments");
 
                     b.Navigation("ItemBookmarks");
-
-                    b.Navigation("ItemLikes");
                 });
 #pragma warning restore 612, 618
         }

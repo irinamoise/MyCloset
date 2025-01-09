@@ -60,6 +60,9 @@ namespace MyCloset.Models
 
         // [NotMapped]
         //   public IEnumerable<SelectListItem>? AllTags { get; set; }
+
+        public int Likes { get; set; }
+        public virtual ICollection<ItemLike> ItemLikes { get; set; }
     }
 
 }
