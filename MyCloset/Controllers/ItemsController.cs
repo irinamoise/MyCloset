@@ -1,4 +1,5 @@
-﻿using System.Net.NetworkInformation;
+﻿using System;
+using System.Net.NetworkInformation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -88,10 +89,22 @@ namespace MyCloset.Controllers
                         || it.Caption.Contains(search)
                     ).Select(a => a.Id).ToList();
 
-                // de adaugat cautarea dupa colectii/bookmarkuri
+                // cautarea dupa colectii/bookmarkuri
 
-                items = db.Items.Where(item => itemIds.Contains(item.Id)).Include("Category").Include("User").OrderByDescending(a => a.Date);
+                List<int> bookmarkItemIds = db.ItemBookmarks.Where
+                    (
+                    ab => ab.Bookmark != null && ab.Bookmark.Name.Contains(search)
+                    ).Select(ab => ab.ItemId)
+                    .Where(itemId => itemId.HasValue)
+                    .Select(itemId => itemId.Value)
+                    .ToList();
+
+                List<int> mergedIds = itemIds.Union(bookmarkItemIds).ToList();
+
+                items = db.Items.Where(item => mergedIds.Contains(item.Id)).Include("Category").Include("User").OrderByDescending(a => a.Date);
             }
+
+           
             ViewBag.Items = items;
             ViewBag.Search = search;
 
@@ -100,54 +113,33 @@ namespace MyCloset.Controllers
                 ViewBag.Message = TempData["message"];
             }
 
-            // AFISARE PAGINATA
+         
+            //int _perPage = 3;
+            //int totalItems = items.Count();
+            //var currentPage = Convert.ToInt32(HttpContext.Request.Query["page"]);
+            //var offset = 0;
 
-            // Alegem sa afisam 3 articole pe pagina
-            int _perPage = 3;
+            //if (!currentPage.Equals(0))
+            //{
+            //    offset = (currentPage - 1) * _perPage;
+            //}
 
-            // Fiind un numar variabil de articole, verificam de fiecare data utilizand 
-            // metoda Count()
+            //var paginatedItems = items.Skip(offset).Take(_perPage);
 
-            int totalItems = items.Count();
+            //ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perPage);
 
-            // Se preia pagina curenta din View-ul asociat
-            // Numarul paginii este valoarea parametrului page din ruta
-            // /Articles/Index?page=valoare
-
-            var currentPage = Convert.ToInt32(HttpContext.Request.Query["page"]);
-
-            // Pentru prima pagina offsetul o sa fie zero
-            // Pentru pagina 2 o sa fie 3 
-            // Asadar offsetul este egal cu numarul de articole care au fost deja afisate pe paginile anterioare
-            var offset = 0;
-
-            // Se calculeaza offsetul in functie de numarul paginii la care suntem
-            if (!currentPage.Equals(0))
-            {
-                offset = (currentPage - 1) * _perPage;
-            }
-
-            // Se preiau articolele corespunzatoare pentru fiecare pagina la care ne aflam 
-            // in functie de offset
-            var paginatedItems = items.Skip(offset).Take(_perPage);
-
-
-            // Preluam numarul ultimei pagini
-            ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perPage);
-
-            // Trimitem articolele cu ajutorul unui ViewBag catre View-ul corespunzator
-            ViewBag.Items = paginatedItems;
+            //ViewBag.Items = paginatedItems;
 
             // DACA AVEM AFISAREA PAGINATA IMPREUNA CU SEARCH
 
-            if (search != "")
-            {
-                ViewBag.PaginationBaseUrl = "/Items/Index/?search=" + search + "&page";
-            }
-            else
-            {
-                ViewBag.PaginationBaseUrl = "/Items/Index/?page";
-            }
+            //if (search != "")
+            //{
+            //    ViewBag.PaginationBaseUrl = "/Items/Index/?search=" + search + "&page";
+            //}
+            //else
+            //{
+                ViewBag.PaginationBaseUrl = "/Items/Index/&page";
+            //}
 
             return View();
         }

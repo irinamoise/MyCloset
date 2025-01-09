@@ -1,4 +1,15 @@
-﻿
+﻿@model IEnumerable<MyCloset.Models.Item>
+@{
+    var sortOrder = ViewBag.SortOrder as string;
+    var currentPage = ViewBag.CurrentPage as int?;
+    var lastPage = ViewBag.LastPage as int?;
+    var paginationBaseUrl = ViewBag.PaginationBaseUrl as string;
+}
+
+<div>
+    <a href="@Url.Action("Index", new { sortOrder = "most_recent" })" class="btn btn-primary @(sortOrder == "most_recent" ? "active" : "")">Most Recent</a>
+    <a href="@Url.Action("Index", new { sortOrder = "most_liked" })" class="btn btn-primary @(sortOrder == "most_liked" ? "active" : "")">Most Liked</a>
+</div>
 
 <div class="row">
     <div class="col-12">
@@ -18,8 +29,37 @@
     </div>
 </div>
 
+@* Afisarea paginata a articolelor *@
 
 
+<div>
+    <nav aria-label="Page navigation">
+    <ul class="pagination">
+        @if (currentPage > 1)
+        {
+            <li class="page-item">
+                <a class="page-link" href="@paginationBaseUrl@(currentPage - 1)" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+        }
+        @for (int i = 1; i <= lastPage; i++)
+        {
+            <li class="page-item @(i == currentPage ? "active" : "")">
+                <a class="page-link" href="@paginationBaseUrl@i">@i</a>
+            </li>
+        }
+        @if (currentPage < lastPage)
+        {
+            <li class="page-item">
+                <a class="page-link" href="@paginationBaseUrl@(currentPage + 1)" aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        }
+    </ul>
+    </nav>
+</div>
 
 <div class="row mb-4">
     @foreach (var item in ViewBag.Items)
