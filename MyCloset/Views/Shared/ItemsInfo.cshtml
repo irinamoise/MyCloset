@@ -1,0 +1,44 @@
+﻿@model MyCloset.Models.Item
+
+<div class="card h-100">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+                <a asp-controller="Users" asp-action="Show" asp-route-id="@Model.User.Id" class="text-decoration-none">
+                    <i class="bi bi-person"></i> @Model.User.UserName
+                </a>
+            </div>
+            <div><i class="bi bi-globe"></i> @Model.Category.CategoryName</div>
+            
+        </div>
+        <h5 class="card-title alert-success py-2 px-3 rounded-2 text-center">@Model.Name</h5>
+
+        @if (@Model.Image.Contains(".mp4") || @Model.Image.Contains(".mov"))
+        {
+            <video class="card-img-top" controls>
+                <source src="@Model.Image" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        }
+        else
+        {
+            <img src="@Model.Image" class="card-img-top" alt="Item Image" style="object-fit: cover; height: 300px;" />
+        }
+
+        <div class="card-text mt-3">@Model.Caption</div>
+
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            
+            <form asp-action="Like" asp-controller="Items" method="post" class="mb-0">
+                <input type="hidden" name="id" value="@Model.Id" />
+                <button type="submit" class="btn btn-primary">Like</button>
+            </form>
+            <p class="mb-0">Likes: @Model.Likes</p>
+        </div>
+
+        <div class="d-flex justify-content-between flex-row mt-3">
+            <div><i class="bi bi-calendar"></i> @Model.Date</div>
+        </div>
+    </div>
+</div>
+

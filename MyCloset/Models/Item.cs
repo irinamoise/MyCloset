@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+
 
 namespace MyCloset.Models
 {
@@ -21,6 +23,8 @@ namespace MyCloset.Models
 
         public DateTime Date { get; set; }
 
+
+        [Required(ErrorMessage = "Incarcarea unei imagini este obligatorie!")]
         public string Image { get; set; }
 
         // string pt salvarea path-ului imaginii pt item
@@ -46,7 +50,7 @@ namespace MyCloset.Models
         //public virtual ICollection<Tag >? Tags { get; set; }
 
         // relatia many-to-many dintre Item si Bookmark
-        public virtual ICollection<ItemBookmark>? ArticleBookmarks { get; set; }
+        public virtual ICollection<ItemBookmark>? ItemBookmarks { get; set; }
 
         // rel many-to-many dintre Item si Tag
         //public virtual ICollection<ItemTag>? ItemTags { get; set; }
@@ -56,6 +60,9 @@ namespace MyCloset.Models
 
         // [NotMapped]
         //   public IEnumerable<SelectListItem>? AllTags { get; set; }
+
+        public int Likes { get; set; }
+        public virtual ICollection<ItemLike>? ItemLikes { get; set; }
     }
 
 }

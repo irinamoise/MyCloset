@@ -167,6 +167,9 @@ namespace MyCloset.Data.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Bio")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -177,6 +180,12 @@ namespace MyCloset.Data.Migrations
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("FirstName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LastName")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
@@ -200,6 +209,9 @@ namespace MyCloset.Data.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("ProfilePicture")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -231,6 +243,9 @@ namespace MyCloset.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsPublic")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -316,6 +331,9 @@ namespace MyCloset.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int>("Likes")
+                        .HasColumnType("int");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -341,22 +359,46 @@ namespace MyCloset.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("BookmarkDate")
-                        .HasColumnType("datetime2");
+                    b.Property<int?>("ItemId")
+                        .HasColumnType("int");
 
                     b.Property<int?>("BookmarkId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ItemId")
-                        .HasColumnType("int");
+                    b.Property<DateTime>("BookmarkDate")
+                        .HasColumnType("datetime2");
 
-                    b.HasKey("Id");
+                    b.HasKey("Id", "ItemId", "BookmarkId");
 
                     b.HasIndex("BookmarkId");
 
                     b.HasIndex("ItemId");
 
                     b.ToTable("ItemBookmarks");
+                });
+
+            modelBuilder.Entity("MyCloset.Models.ItemLike", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ItemLikes");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -413,7 +455,7 @@ namespace MyCloset.Data.Migrations
             modelBuilder.Entity("MyCloset.Models.Bookmark", b =>
                 {
                     b.HasOne("MyCloset.Models.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("Bookmarks")
                         .HasForeignKey("UserId");
 
                     b.Navigation("User");
@@ -428,7 +470,7 @@ namespace MyCloset.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("MyCloset.Models.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("Comments")
                         .HasForeignKey("UserId");
 
                     b.Navigation("Item");
@@ -445,7 +487,7 @@ namespace MyCloset.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("MyCloset.Models.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("Items")
                         .HasForeignKey("UserId");
 
                     b.Navigation("Category");
@@ -457,15 +499,47 @@ namespace MyCloset.Data.Migrations
                 {
                     b.HasOne("MyCloset.Models.Bookmark", "Bookmark")
                         .WithMany("ItemBookmarks")
-                        .HasForeignKey("BookmarkId");
+                        .HasForeignKey("BookmarkId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("MyCloset.Models.Item", "Item")
-                        .WithMany("ArticleBookmarks")
-                        .HasForeignKey("ItemId");
+                        .WithMany("ItemBookmarks")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Bookmark");
 
                     b.Navigation("Item");
+                });
+
+            modelBuilder.Entity("MyCloset.Models.ItemLike", b =>
+                {
+                    b.HasOne("MyCloset.Models.Item", "Item")
+                        .WithMany("ItemLikes")
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyCloset.Models.ApplicationUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("MyCloset.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Bookmarks");
+
+                    b.Navigation("Comments");
+
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("MyCloset.Models.Bookmark", b =>
@@ -480,9 +554,11 @@ namespace MyCloset.Data.Migrations
 
             modelBuilder.Entity("MyCloset.Models.Item", b =>
                 {
-                    b.Navigation("ArticleBookmarks");
-
                     b.Navigation("Comments");
+
+                    b.Navigation("ItemBookmarks");
+
+                    b.Navigation("ItemLikes");
                 });
 #pragma warning restore 612, 618
         }

@@ -13,6 +13,8 @@ namespace MyCloset.Models
 
         // o colectie este creata de catre un user
         public string? UserId { get; set; }
+
+        public bool IsPublic { get; set; }
         public virtual ApplicationUser? User { get; set; }
 
         // relatia many-to-many dintre Item si Bookmark

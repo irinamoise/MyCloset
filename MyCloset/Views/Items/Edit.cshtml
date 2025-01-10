@@ -47,10 +47,27 @@
                     <br />
                 </div>
 
+                @if (@Model.Image.Contains(".mp4") || @Model.Image.Contains(".mov"))
+                {
+                    <video width="550" height="300" controls>
+                        <source src="@Model.Image" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                }
+                else
+                {
+                    <img src="@Model.Image" alt="Item Image" style="width: 50%; height: 100%; object-fit: cover" />
+                }
+
+                <input type="hidden" asp-for="Image" />
+
+                <br />
+                <br />
+
+
                 <button class="btn btn-sm btn-success" type="submit">Modifica articol</button>
 
             </form>
         </div>
     </div>
 </div>
-

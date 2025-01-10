@@ -13,18 +13,34 @@
 
 <br />
 
-
-@foreach (var item in ViewBag.Items)
-{
-    <div class="card">
-
-        <partial name="ItemInfo" model="item"></partial>
-
-        <a class="btn btn-success" asp-controller="Items" asp-action="Show" asp-route-id="@item.Id">Afisare item</a>
-
+@* motorul de cautare *@
+<form method="GET">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control"
+               placeholder="Search topics or keywords" name="search"
+               value="@ViewBag.SearchString">
+        <button class="btn btn-outline-success"
+                type="submit">
+            Search
+        </button>
     </div>
+</form>
 
-    <br />
-    <br />
-}
+
+
+<div class="container">
+    <div class="row">
+        @foreach (var item in ViewBag.Items)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100">
+                    <partial name="ItemsInfo" model="item"></partial>
+                    <a class="btn btn-success" asp-controller="Items" asp-action="Show" asp-route-id="@item.Id">Afisare item</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
 

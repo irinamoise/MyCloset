@@ -1,6 +1,11 @@
 ﻿@model MyCloset.Models.Item
 
-
+@if (TempData["message"] != null)
+{
+    <div class="alert @ViewBag.Alert p-3 rounded-3 text-center mb-5">
+        @ViewBag.Message
+    </div>
+}
 
 @* Afisarea unui item impreuna cu categoria din care face *@
 
@@ -8,24 +13,51 @@
 
 <div class="card">
 
-    <partial name="ItemInfo" model="Model"></partial>
+    <partial name="ItemsInfo" model="Model"></partial>
 
-    <div class="d-flex flex-row justify-content-between">
+      @*if ((ViewBag.AfisareButoane == true && Model.UserId == ViewBag.UserCurent) || ViewBag.EsteAdmin == true)*@
+    @if (Model.UserId == ViewBag.UserCurent || ViewBag.EsteAdmin == true)
+    {
+        <div class="d-flex flex-row justify-content-between">
 
-        <a class="btn btn-success" asp-controller="Items" asp-action="Edit" asp-route-id="@Model.Id">Editeaza item</a>
+            <a class="btn btn-success" asp-controller="Items" asp-action="Edit" asp-route-id="@Model.Id">Editeaza item</a>
 
-        <form method="post" asp-controller="Items" asp-action="Delete" asp-route-id="@Model.Id">
+            <form method="post" asp-controller="Items" asp-action="Delete" asp-route-id="@Model.Id">
 
-            <button class="btn btn-danger" type="submit">Sterge item</button>
+                <button class="btn btn-danger" type="submit">Sterge item</button>
 
-        </form>
+            </form>
 
-    </div>
+        </div>
+    }
+
+    <form method="post" asp-controller="Items" asp-action="AddBookmark">
+        <input type="hidden" name="ItemId" value="@Model.Id" />
+        <div class="d-flex flex-row justify-content-center p-3 border-1 border-top">
+            <div>
+                <select name="BookmarkId" class="form-control">
+                    <option selected>Adauga acest item intr-o colectie</option>
+                    @foreach (var bookmark in ViewBag.UserBookmarks)
+                    {
+                        <option value="@bookmark.Id">@bookmark.Name</option>
+                    }
+                </select>
+            </div>
+            <div>
+                <input type="submit" class="btn btn-success alert-success" value="+" />
+            </div>
+        </div>
+    </form>
+
+    <br />
+    <br />
 
 </div>
 
 <br />
 <br />
+
+
 
 
 @* Afisare comentarii impreuna cu butoanele de editare si stergere *@
@@ -42,34 +74,31 @@
 
                     <p>@comm.Content</p>
                     <small>@comm.Date</small>
+                    <strong><i class="bi bi-person"> @comm.User.UserName</i></strong>
 
                 </div>
                 <br>
 
-                <div class="d-flex">
+                @if (comm.UserId == ViewBag.UserCurent || ViewBag.EsteAdmin == true)
+                {
+                    <div class="d-flex">
+                        <div>
+                            <a class="btn btn-outline-primary" asp-controller="Comments" asp-action="Edit" asp-route-id="@comm.Id">
+                                <i class="bi bi-pencil-square"></i> Editeaza
+                            </a>
 
-                    <div>
+                        </div>
+                        <div>
+                            <form method="post" asp-controller="Comments" asp-action="Delete" asp-route-id="@comm.Id">
 
-                        <a class="btn btn-outline-primary" asp-controller="Comments" asp-action="Edit" asp-route-id="@comm.Id">
-                            <i class="bi bi-pencil-square"></i> Editeaza
-                        </a>
+                                <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i>Sterge</button>
 
+                            </form>
+                        </div>
                     </div>
-
-                    <div>
-
-                        <form method="post" asp-controller="Comments" asp-action="Delete" asp-route-id="@comm.Id">
-
-                            <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i>Sterge</button>
-
-                        </form>
-
-                    </div>
-
-                </div>
+                }
 
                 <br />
-
             </div>
 
             <div class="col-md-2"></div>
@@ -78,7 +107,6 @@
 
     </div>
 }
-
 
 @* Afisarea formularului in care se poate adauga un comentariu *@
 
@@ -92,11 +120,11 @@
 
             <div class="card">
 
-                <form method="post" asp-controller="AItems" asp-action="Show">
+                <form method="post" asp-controller="Items" asp-action="Show">
 
                     <div class="card-body">
 
-                        <input type="hidden" name="ArticleId" value="@Model.Id" />
+                        <input type="hidden" name="ItemId" value="@Model.Id" />
 
                         <label>Continut comentariu</label>
                         <br />
