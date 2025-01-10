@@ -89,8 +89,7 @@ namespace MyCloset.Controllers
                                   .Include("ItemBookmarks.Item.Category")
                                   .Include("ItemBookmarks.Item.User")
                                   .Include("User")
-                                  .Where(b => b.Id == id)
-                                  .Where(b => b.UserId == _userManager.GetUserId(User))
+                                  .Where(b => b.Id == id)                                 
                                   .FirstOrDefault();
 
                 if (bookmarks == null)
@@ -163,9 +162,68 @@ namespace MyCloset.Controllers
             }
         }
 
+        [Authorize]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var bookmark = await db.Bookmarks.FindAsync(id);
+            if (bookmark == null || bookmark.UserId != _userManager.GetUserId(User))
+            {
+                return NotFound();
+            }
+            return View(bookmark);
+        }
 
-        // Conditiile de afisare a butoanelor de editare si stergere
-        private void SetAccessRights()
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> Edit(int id, Bookmark bookmark)
+        {
+            if (id != bookmark.Id)
+            {
+                return NotFound();
+            }
+
+            Bookmark bkm = db.Bookmarks.Find(id);
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var user = await _userManager.GetUserAsync(User);
+                    if (bookmark.UserId != user.Id)
+                    {
+                        return Unauthorized();
+                    }
+
+                    bkm.Name = bookmark.Name;
+                    bkm.IsPublic = bookmark.IsPublic;
+                    
+                    db.SaveChanges();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!BookmarkExists(bookmark.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+                return RedirectToAction("Index");
+            }
+            return View(bookmark);
+
+        }
+            private bool BookmarkExists(int id)
+            {
+                return db.Bookmarks.Any(e => e.Id == id);
+            }
+        
+
+
+    // Conditiile de afisare a butoanelor de editare si stergere
+    private void SetAccessRights()
         {
             ViewBag.AfisareButoane = false;
 

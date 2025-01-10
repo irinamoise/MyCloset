@@ -21,23 +21,22 @@
                 <p><i class="bi bi-phone"></i> Descriere: @Model.Bio</p>
             }
 
-            @if (ViewBag.Items.Count > 0)
+            
+            <p><i class="bi bi-person"> </i> Item-uri:</p>
+            @foreach (var item in ViewBag.Items)
             {
-                <p><i class="bi bi-person"> </i> Item-uri:</p>
-                @foreach (var item in ViewBag.Items)
+                if (item.UserId == Model.Id)
                 {
-                    if (item.UserId == Model.Id)
-                    {
-                        <div class="card">
-                            <partial name="ItemsInfo" model="item"></partial>
-                            <a class="btn btn-success" asp-controller="Items" asp-action="Show" asp-route-id="@item.Id">Afisare item</a>
-                        </div>
-                        <br />
-                        <br />
-                    }
+                    <div class="card">
+                        <partial name="ItemsInfo" model="item"></partial>
+                        <a class="btn btn-success" asp-controller="Items" asp-action="Show" asp-route-id="@item.Id">Afisare item</a>
+                    </div>
+                    <br />
+                    <br />
                 }
-
             }
+
+            
         </div>
 
            

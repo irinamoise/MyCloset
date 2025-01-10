@@ -48,7 +48,7 @@ namespace MyCloset.Controllers
             return View();
         }
 
-        [Authorize(Roles = "Admin")]
+        
         public async Task<ActionResult> Show(string id)
         {
             ApplicationUser user = db.Users.Find(id);
@@ -58,12 +58,24 @@ namespace MyCloset.Controllers
 
             ViewBag.UserCurent = await _userManager.GetUserAsync(User);
 
-            ViewBag.Items = db.Items.Where(item => item.UserId == id).ToList();
+            var items = from item in db.Items.Include("Category").Include("User")
+                               .Where(b => b.UserId == user.Id).OrderByDescending(a => a.Date)
+                        select item;
+
+            
+            ViewBag.Items = items;
+
+
+            var bookmarks = from bookmark in db.Bookmarks.Include("User")
+                               .Where(b => b.UserId == user.Id && b.IsPublic == true )
+                            select bookmark;
+
+            ViewBag.Bookmarks = bookmarks;
 
             return View(user);
         }
 
-        [Authorize]
+        
         public async Task<IActionResult> MyProfile()
         {
             var user = await _userManager.GetUserAsync(User);
@@ -71,12 +83,25 @@ namespace MyCloset.Controllers
 
             ViewBag.UserCurent = user;
             ViewBag.Roles = roles;
-            ViewBag.Items = db.Items.Where(item => item.UserId == user.Id).ToList();
+
+            var items = from item in db.Items.Include("Category").Include("User")
+                               .Where(b => b.UserId == user.Id).OrderByDescending(a => a.Date)
+                        select item;
+
+            ViewBag.Items = items;
+
+            
+            var bookmarks = from bookmark in db.Bookmarks.Include("User")
+                               .Where(b => b.UserId == user.Id)
+                                select bookmark;
+
+            ViewBag.Bookmarks = bookmarks;
 
             return View("Show", user);
         }
 
-        [Authorize]
+
+
         public async Task<ActionResult> Edit(string id)
         {
             ApplicationUser user = db.Users.Find(id);
@@ -132,11 +157,11 @@ namespace MyCloset.Controllers
 
         [Authorize]
         [HttpPost]
-        public async Task<ActionResult> Edit(string id, ApplicationUser newData, [FromForm] string newRole, [FromForm] IFormFile ProfilePicture)
+        public async Task<ActionResult> Edit(string id, ApplicationUser newData, [FromForm] IFormFile ProfilePicture)
         {
             ApplicationUser user = db.Users.Find(id);
 
-            user.AllRoles = GetAllRoles();
+      
 
             if (ModelState.IsValid)
             {
@@ -178,22 +203,18 @@ namespace MyCloset.Controllers
                     db.Entry(user).State = EntityState.Modified;
                 }
 
-                // Cautam toate rolurile din baza de date
-                var roles = db.Roles.ToList();
-
-                foreach (var role in roles)
-                {
-                    // Scoatem userul din rolurile anterioare
-                    await _userManager.RemoveFromRoleAsync(user, role.Name);
-                }
-                // Adaugam noul rol selectat
-                var roleName = await _roleManager.FindByIdAsync(newRole);
-                await _userManager.AddToRoleAsync(user, roleName.ToString());
+        
 
                 db.SaveChanges();
+                return RedirectToAction("MyProfile");
             }
-            db.SaveChanges();
-            return RedirectToAction("MyProfile");
+            else
+            {
+                
+                return View(newData);
+            }
+            
+            
         }
 
         [HttpPost]

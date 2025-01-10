@@ -45,30 +45,7 @@
         <span asp-validation-for="ProfilePicture" class="text-danger"></span>
     </div>
 
-    <i class="bi bi-card-list"></i>
-    <label>Selectati rolul</label>
-    <br />
-
-
-    @{
-        var isAdmin = User.IsInRole("Admin");
-    }
-
-    <select name="newRole" class="form-control" @(isAdmin ? "" : "disabled")>
-        <option selected>Selectati rolul</option>
-
-        @foreach (var role in ViewBag.AllRoles)
-        {
-            @if (ViewBag.UserRole == role.Value)
-            {
-                <option selected="selected" value="@role.Value">@role.Text</option>
-            }
-            else
-            {
-                <option value="@role.Value">@role.Text</option>
-            }
-        }
-    </select>
+    
 
     <button type="submit" class="btn btn-sm btn-success">Editare user</button>
 

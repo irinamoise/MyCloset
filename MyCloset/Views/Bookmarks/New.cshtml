@@ -13,7 +13,16 @@
     <input asp-for="Name" class="form-control" />
     <span asp-validation-for="Name" class="text-danger"></span>
     <br />
+    <br/>
+
+    <div class="form-group">
+        <label asp-for="IsPublic" class="control-label"></label>
+        <input asp-for="IsPublic" class="form-check-input" />
+        <span asp-validation-for="IsPublic" class="text-danger"></span>
+    </div>
+
     <br />
+    <br/>
 
     <button type="submit" class="btn btn-success">Adauga bookmark</button>
 

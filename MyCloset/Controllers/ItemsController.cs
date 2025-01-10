@@ -391,6 +391,8 @@ namespace MyCloset.Controllers
 
         }
 
+   
+
 
         // Se sterge un item din baza de date 
         [HttpPost]
