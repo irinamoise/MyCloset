@@ -39,8 +39,10 @@ namespace MyCloset.Controllers
         /// 
         
         [HttpPost]
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Like(int id)
         {
+
             var userId = _userManager.GetUserId(User);
             var item = db.Items.Include(i => i.ItemLikes).FirstOrDefault(i => i.Id == id);
 
@@ -67,7 +69,7 @@ namespace MyCloset.Controllers
                 item.Likes--;
             }
 
-            db.SaveChanges();
+               db.SaveChanges();
 
             return RedirectToAction("Show", new { id = id });
         }

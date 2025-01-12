@@ -27,14 +27,14 @@
 
         <div class="card-text mt-3">@Model.Caption</div>
 
-        <div class="d-flex justify-content-between align-items-center mt-3">
+        @* <div class="d-flex justify-content-between align-items-center mt-3"> *@
             
-            <form asp-action="Like" asp-controller="Items" method="post" class="mb-0">
-                <input type="hidden" name="id" value="@Model.Id" />
-                <button type="submit" class="btn btn-primary">Like</button>
-            </form>
-            <p class="mb-0">Likes: @Model.Likes</p>
-        </div>
+        @*     <form asp-action="Like" asp-controller="Items" method="post" class="mb-0"> *@
+        @*         <input type="hidden" name="id" value="@Model.Id" /> *@
+        @*         <button type="submit" class="btn btn-primary">Like</button> *@
+        @*     </form> *@
+        @*     <p class="mb-0">Likes: @Model.Likes</p> *@
+        @* </div> *@
 
         <div class="d-flex justify-content-between flex-row mt-3">
             <div><i class="bi bi-calendar"></i> @Model.Date</div>

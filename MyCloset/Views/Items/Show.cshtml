@@ -15,6 +15,15 @@
 
     <partial name="ItemsInfo" model="Model"></partial>
 
+    <div class="d-flex justify-content-between align-items-center mt-3">
+
+        <form asp-action="Like" asp-controller="Items" method="post" class="mb-0">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-primary">Like</button>
+        </form>
+        <p class="mb-0">Likes: @Model.Likes</p>
+    </div>
+
       @*if ((ViewBag.AfisareButoane == true && Model.UserId == ViewBag.UserCurent) || ViewBag.EsteAdmin == true)*@
     @if (Model.UserId == ViewBag.UserCurent || ViewBag.EsteAdmin == true)
     {
