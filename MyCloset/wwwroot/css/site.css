@@ -43,3 +43,19 @@ a.nav-link {
     .logoutbtn:hover {
         color: #00b894 !important;
     }
+
+.card-img-top {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    height: 300px;
+    width: auto;
+}
+
+.card-body img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    height: 300px;
+    width: auto;
+}

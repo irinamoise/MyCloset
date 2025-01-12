@@ -6,10 +6,7 @@
     var paginationBaseUrl = ViewBag.PaginationBaseUrl as string;
 }
 
-<div>
-    <a href="@Url.Action("Index", new { sortOrder = "most_recent" })" class="btn btn-primary @(sortOrder == "most_recent" ? "active" : "")">Most Recent</a>
-    <a href="@Url.Action("Index", new { sortOrder = "most_liked" })" class="btn btn-primary @(sortOrder == "most_liked" ? "active" : "")">Most Liked</a>
-</div>
+
 
 <div class="row">
     <div class="col-12">
@@ -31,6 +28,12 @@
 
 @* Afisarea paginata a articolelor *@
 
+<div>
+    <a href="@Url.Action("Index", new { sortOrder = "most_recent" })" class="btn btn-primary @(sortOrder == "most_recent" ? "active" : "")">Most Recent</a>
+    <a href="@Url.Action("Index", new { sortOrder = "most_liked" })" class="btn btn-primary @(sortOrder == "most_liked" ? "active" : "")">Most Liked</a>
+</div>
+
+<br />
 
 <div>
     <nav aria-label="Page navigation">
