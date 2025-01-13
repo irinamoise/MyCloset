@@ -48,7 +48,7 @@ namespace MyCloset.Controllers
             return View();
         }
 
-        
+        [Authorize]
         public async Task<ActionResult> Show(string id)
         {
             ApplicationUser user = db.Users.Find(id);
